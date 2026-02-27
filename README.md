@@ -1,2 +1,103 @@
-# STM32-Lab
-CSE-2206: Microcontroller and Embedded System Lab
+# STM32 Development Guide
+
+A step-by-step guide for setting up STM32 projects using both **HAL (Hardware Abstraction Layer)** and **Bare-Metal** programming approaches with the **NUCLEO-F446RE** development board.
+
+## 📋 Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [HAL Programming Workflow](#hal-programming-workflow)
+- [Bare-Metal Programming Workflow](#bare-metal-programming-workflow)
+- [Project Workspace Location](#project-workspace-location)
+
+## 🛠️ Prerequisites
+
+Make sure the following tools are installed before getting started:
+
+- [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html)
+- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
+- **Hardware:** NUCLEO-F446RE development board
+- **Cable:** USB Type-A to Mini-B
+- **Operating System:** Windows 11
+
+## ⚙️ HAL Programming Workflow
+
+HAL (Hardware Abstraction Layer) programming uses STM32CubeMX to auto-generate initialization code, which is then imported into STM32CubeIDE.
+
+### Step 1 — Generate Code with STM32CubeMX
+
+```
+STM32CubeMX
+  └── New Project
+        └── Start My Project from ST Board
+              └── ACCESS TO BOARD SELECTOR
+                    └── Commercial Part Number → NUCLEO-F446RE
+                          └── Start Project
+                                └── Initialize all peripherals with default mode? → Yes
+```
+
+### Step 2 — Configure the Project Manager
+
+```
+Project Manager
+  ├── Project Name     → <your-project-name>
+  ├── Project Location → <your-project-location>
+  └── Toolchain / IDE  → STM32CubeIDE
+        └── GENERATE CODE
+```
+
+> **Prompts during generation:**
+> | Prompt | Action |
+> |---|---|
+> | Project Manager Settings Popup | Click **Yes** |
+> | Notification | Select **Don't ask me again** |
+> | Licence Agreement | Click **Agree** → **Finish** |
+> | Windows Security Alert | Click **Allow** |
+> | Success Dialog | Click **Close** |
+
+### Step 3 — Import Project into STM32CubeIDE
+
+```
+STM32CubeIDE
+  └── File
+        └── Open Projects from File System
+              └── Import Source → Select project folder → Finish
+```
+
+## 🔩 Bare-Metal Programming Workflow
+
+Bare-metal programming gives full control over hardware without abstraction layers. Projects are created directly in STM32CubeIDE.
+
+### Steps
+
+```
+STM32CubeIDE
+  └── File
+        └── STM32 Project Create/Import
+              └── Create New STM32 Project
+                    └── STM32CubeIDE Empty Project
+                          └── Next
+                                └── Board Selector → NUCLEO-F446RE
+                                      └── Next
+                                            └── Project Name → <your-project-name>
+                                                  └── Finish
+```
+
+## 📁 Project Workspace Location
+
+By default, STM32CubeIDE projects are saved at:
+
+```
+C:\Users\USER\STM32CubeIDE\workspace_2.1.0
+```
+
+> 💡 You can change this location during the IDE's initial workspace setup or via **File → Switch Workspace**.
+
+## 📌 Notes
+
+- Replace `<your-project-name>` and `<your-project-location>` with your actual project name and desired save path.
+- The **HAL workflow** is recommended for beginners as it auto-generates peripheral configuration code.
+- The **Bare-Metal workflow** is ideal for advanced users who want full hardware control.
+
+## 📄 License
+
+This project is open-source. Feel free to use and modify it as needed.
