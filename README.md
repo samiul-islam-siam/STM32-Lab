@@ -1,6 +1,6 @@
 # STM32 Development Guide
 
-A step-by-step guide for setting up STM32 projects using both **HAL (Hardware Abstraction Layer)** and **Bare-Metal** programming approaches with the **NUCLEO-F446RE** development board.
+A step-by-step guide for setting up STM32 projects using both **HAL (Hardware Abstraction Layer)** and **Bare-Metal (No HAL)** programming approaches with the **NUCLEO-F446RE** development board.
 
 ## 📋 Table of Contents
 
@@ -11,7 +11,7 @@ A step-by-step guide for setting up STM32 projects using both **HAL (Hardware Ab
 
 ## 🛠️ Prerequisites
 
-Make sure the following tools are installed before getting started:
+Make sure the following tools are installed before getting started (version 2.1.0):
 
 - [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html)
 - [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
@@ -27,10 +27,10 @@ HAL (Hardware Abstraction Layer) programming uses STM32CubeMX to auto-generate i
 
 ```
 STM32CubeMX
-  └── New Project
-        └── Start My Project from ST Board
-              └── ACCESS TO BOARD SELECTOR
-                    └── Commercial Part Number → NUCLEO-F446RE
+  └── From New Project
+        └── Start My Project from MCU
+              └── ACCESS TO MCU SELECTOR
+                    └── Commercial Part Number: STM32F446RET6TR
                           └── Start Project
                                 └── Initialize all peripherals with default mode? → Yes
 ```
@@ -39,8 +39,8 @@ STM32CubeMX
 
 ```
 Project Manager
-  ├── Project Name     → <your-project-name>
-  ├── Project Location → <your-project-location>
+  ├── Project Name     → LAB_1B <your-project-name>
+  ├── Project Location → C:\Users\USER\STM32CubeIDE\workspace_2.1.0\ <your-project-location>
   └── Toolchain / IDE  → STM32CubeIDE
         └── GENERATE CODE
 ```
@@ -67,7 +67,7 @@ STM32CubeIDE
 
 Bare-metal programming gives full control over hardware without abstraction layers. Projects are created directly in STM32CubeIDE.
 
-### Steps
+### Step 1
 
 ```
 STM32CubeIDE
@@ -76,10 +76,20 @@ STM32CubeIDE
               └── Create New STM32 Project
                     └── STM32CubeIDE Empty Project
                           └── Next
-                                └── Board Selector → NUCLEO-F446RE
+                                └── MCU/MPU Selector → STM32F446RETx
                                       └── Next
-                                            └── Project Name → <your-project-name>
+                                            └── Project Name → LAB_1A <your-project-name>
                                                   └── Finish
+```
+
+### Step 2
+
+```
+1. Copy 'Drivers' folder from HAL-based project that was created. <br>
+2. Paste it into current project. <br>
+3. Delete the 'STM32F4xx_HAL_Driver' from 'Drivers' folder. <br>
+4. In Drivers -> CMSIS -> Include and Drivers -> CMSIS -> Device -> ST -> STM32F4xx -> Include: Add/remove include path... -> OK
+
 ```
 
 ## 📁 Project Workspace Location
@@ -87,7 +97,7 @@ STM32CubeIDE
 By default, STM32CubeIDE projects are saved at:
 
 ```
-C:\Users\USER\STM32CubeIDE\workspace_2.1.0
+C:\Users\USER\STM32CubeIDE\workspace_2.1.0\
 ```
 
 > 💡 You can change this location during the IDE's initial workspace setup or via **File → Switch Workspace**.
