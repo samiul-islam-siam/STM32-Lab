@@ -9,6 +9,39 @@
 #define APB1_CLK 45000000UL
 #define BAUD_RATE 115200UL
 
+void SystemClock_Config(void) {
+	/* 1. Enable HSE and wait for it to be ready */
+	RCC->CR |= RCC_CR_HSEON;
+	while (!(RCC->CR & RCC_CR_HSERDY));
+
+	/* 2. Enable Power Controller clock, set VOS scale 1 */
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+	PWR->CR |= PWR_CR_VOS; /* Scale 1: max 180 MHz */
+
+	/* 3. Configure Flash: 5 wait-states + ART Accelerator + prefetch */
+	FLASH->ACR = FLASH_ACR_LATENCY_5WS | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN;
+
+	/* 4. Configure PLL: HSE/4 * 180 / 2 = 180 MHz */
+	RCC->PLLCFGR = (4 << RCC_PLLCFGR_PLLM_Pos) /* PLLM = 4 */
+	| (180 << RCC_PLLCFGR_PLLN_Pos) /* PLLN = 180 */
+	| (0 << RCC_PLLCFGR_PLLP_Pos) /* PLLP = /2 */
+	| (15 << RCC_PLLCFGR_PLLQ_Pos) /* PLLQ = 15 */
+	| RCC_PLLCFGR_PLLSRC_HSE; /* Source: HSE */
+
+	/* 5. Set bus prescalers: AHB/1, APB1/4, APB2/2 */
+	RCC->CFGR |= RCC_CFGR_HPRE_DIV1
+	| RCC_CFGR_PPRE1_DIV4 /* APB1 = 180/4 = 45 MHz */
+	| RCC_CFGR_PPRE2_DIV2; /* APB2 = 180/2 = 90 MHz */
+
+	/* 6. Enable PLL and wait */
+	RCC->CR |= RCC_CR_PLLON;
+	while (!(RCC->CR & RCC_CR_PLLRDY));
+
+	/* 7. Switch system clock to PLL */
+	RCC->CFGR |= RCC_CFGR_SW_PLL;
+	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
+}
+
 void USART2_Init(void) {
 	/* 1. Enable clocks */
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
@@ -48,7 +81,9 @@ char USART2_RecvChar(void) {
 }
 
 int main(void) {
+	SystemClock_Config();
 	USART2_Init();
+
 	USART2_SendString(" STM32F446RE UART Polling Demo \r\n");
 	USART2_SendString(" Type a character -- it will be echoed :\r\n");
 
