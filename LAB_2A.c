@@ -10,34 +10,64 @@
 #define BAUD_RATE 115200UL
 
 void SystemClock_Config(void) {
-	/* 1. Enable HSE and wait for it to be ready */
+	/* 1. Enable HSE */
 	RCC->CR |= RCC_CR_HSEON;
 	while (!(RCC->CR & RCC_CR_HSERDY));
 
-	/* 2. Enable Power Controller clock, set VOS scale 1 */
+	/* 2. Enable Power interface clock */
 	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-	PWR->CR |= PWR_CR_VOS; /* Scale 1: max 180 MHz */
 
-	/* 3. Configure Flash: 5 wait-states + ART Accelerator + prefetch */
-	FLASH->ACR = FLASH_ACR_LATENCY_5WS | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN;
+	/* 3. Set Voltage Scale 1 */
+	PWR->CR |= PWR_CR_VOS;
 
-	/* 4. Configure PLL: HSE/4 * 180 / 2 = 180 MHz */
-	RCC->PLLCFGR = (4 << RCC_PLLCFGR_PLLM_Pos) /* PLLM = 4 */
-	| (180 << RCC_PLLCFGR_PLLN_Pos) /* PLLN = 180 */
-	| (0 << RCC_PLLCFGR_PLLP_Pos) /* PLLP = /2 */
-	| (15 << RCC_PLLCFGR_PLLQ_Pos) /* PLLQ = 15 */
-	| RCC_PLLCFGR_PLLSRC_HSE; /* Source: HSE */
+	/* 4. Enable Over-Drive mode */
+	PWR->CR |= PWR_CR_ODEN;
+	while (!(PWR->CSR & PWR_CSR_ODRDY));
 
-	/* 5. Set bus prescalers: AHB/1, APB1/4, APB2/2 */
-	RCC->CFGR |= RCC_CFGR_HPRE_DIV1
-	| RCC_CFGR_PPRE1_DIV4 /* APB1 = 180/4 = 45 MHz */
-	| RCC_CFGR_PPRE2_DIV2; /* APB2 = 180/2 = 90 MHz */
+	PWR->CR |= PWR_CR_ODSWEN;
+	while (!(PWR->CSR & PWR_CSR_ODSWRDY));
 
-	/* 6. Enable PLL and wait */
+	/* 5. Configure Flash:
+	 - 5 wait states
+	 - Instruction cache
+	 - Data cache
+	 - Prefetch enable
+	 */
+	FLASH->ACR =
+	FLASH_ACR_LATENCY_5WS |
+	FLASH_ACR_ICEN |
+	FLASH_ACR_DCEN |
+	FLASH_ACR_PRFTEN;
+
+	/* 6. Configure PLL
+	 HSE = 8 MHz
+	 PLLM = 4
+	 PLLN = 180
+	 PLLP = 2
+	 PLLQ = 15
+	 SYSCLK = 180 MHz
+	 */
+	RCC->PLLCFGR = (4 << RCC_PLLCFGR_PLLM_Pos) 
+			| (180 << RCC_PLLCFGR_PLLN_Pos)
+			| (0 << RCC_PLLCFGR_PLLP_Pos) /* PLLP = /2 */
+			| (15 << RCC_PLLCFGR_PLLQ_Pos) 
+			| RCC_PLLCFGR_PLLSRC_HSE;
+
+	/* 7. Configure prescalers
+	 AHB  = SYSCLK / 1  = 180 MHz
+	 APB1 = AHB / 4     = 45 MHz
+	 APB2 = AHB / 2     = 90 MHz
+	 */
+	RCC->CFGR =
+	RCC_CFGR_HPRE_DIV1  |
+	RCC_CFGR_PPRE1_DIV4 |
+	RCC_CFGR_PPRE2_DIV2;
+
+	/* 8. Enable PLL */
 	RCC->CR |= RCC_CR_PLLON;
 	while (!(RCC->CR & RCC_CR_PLLRDY));
 
-	/* 7. Switch system clock to PLL */
+	/* 9. Select PLL as system clock */
 	RCC->CFGR |= RCC_CFGR_SW_PLL;
 	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
 }
@@ -57,9 +87,12 @@ void USART2_Init(void) {
 	GPIOA->OTYPER &= ~((1UL << 2) | (1UL << 3)); /* Push - Pull */
 	GPIOA->OSPEEDR |= ((3UL << 4) | (3UL << 6)); /* Very High */
 
-	/* 3. Baud rate : BRR = 45 ,000 ,000 / 115 ,200 = 390.625
-	 * Mantissa = 390 , Fraction = 0.625 * 16 = 10 */
-	USART2->BRR = (390 << 4) | 10;
+	/* 3. Baud rate */
+	uint32_t usartdiv = APB1_CLK / BAUD_RATE;
+	uint32_t mantissa = usartdiv;
+	uint32_t fraction = ((APB1_CLK % BAUD_RATE) * 16) / BAUD_RATE;
+
+	USART2->BRR = (mantissa << 4) | (fraction & 0xF);
 
 	/* 4. Enable USART , transmitter , receiver */
 	USART2->CR1 = USART_CR1_UE | USART_CR1_TE | USART_CR1_RE;
