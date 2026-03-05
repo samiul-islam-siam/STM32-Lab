@@ -38,3 +38,4 @@ int main(void)
 }
 
 // -------- Hardware Connections ---------
+Anode D12 & Cathod Groud
