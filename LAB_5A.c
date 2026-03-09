@@ -1,7 +1,7 @@
 /* Lab 5A - UART2 DMA TX (Stream6 Ch4) + Circular RX (Stream5 Ch4) [Comment out]
  * No HAL -- direct DMA register configuration
  */
-// Folloowing code is for DMA RX, similar as in HAL code
+// Following code is for DMA RX, similar as in HAL code
 
 #include <stdint.h>
 #include <stm32f446xx.h>
