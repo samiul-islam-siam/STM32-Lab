@@ -2,6 +2,11 @@
 
 A step-by-step guide for setting up STM32 projects using both **HAL (Hardware Abstraction Layer)** and **Bare-Metal (No HAL)** programming approaches with the **NUCLEO-F446RE** development board.
 
+<p style="text-align: center;">
+  <img src="images/nucleo64_front_layout.png" width="52%" alt="NUCLEO-F446RE board back layout">
+  <img src="images/nucleo64_back_layout.png" width="44%" alt="NUCLEO-F446RE board front layout">
+</p>
+
 ## 📋 Table of Contents
 
 - [Prerequisites](#prerequisites)
@@ -107,7 +112,13 @@ C:\Users\USER\STM32CubeIDE\workspace_2.1.0\
 - Replace `<your-project-name>` and `<your-project-location>` with your actual project name and desired save path.
 - The **HAL workflow** is recommended for beginners as it auto-generates peripheral configuration code.
 - The **Bare-Metal workflow** is ideal for advanced users who want full hardware control.
+- Arduino Uno pin diagram:
+
+<p style="text-align: center;">
+  <img src="images/nucleo64_arduino_diagram.png" width="60%" alt="NUCLEO-F446RE pin diagram">
+</p>
 
 ## 📄 License
 
-This project is open-source. Feel free to use and modify it as needed.
+This project is open-source. Feel free to use and modify it as needed. <br>
+Image source: <a href="https://st.com">STMicroelectronics</a>
