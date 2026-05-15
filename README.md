@@ -115,7 +115,7 @@ C:\Users\USER\STM32CubeIDE\workspace_2.1.0\
 - Arduino Uno pin diagram:
 
 <p style="text-align: center;">
-  <img src="images/nucleo64_arduino_diagram.png" width="60%" alt="NUCLEO-F446RE pin diagram">
+  <img src="images/nucleo64_arduino_diagram.png" width="90%" alt="NUCLEO-F446RE pin diagram">
 </p>
 
 ## 📄 License
