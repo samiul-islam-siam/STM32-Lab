@@ -1,25 +1,9 @@
 /*
- * ============================================================
- * CSE 2206 — Lab-02 Task 5: WS2812B Bare-Metal + DMA (FINAL)
- * STM32F446RE | PA8 → TIM1_CH1 (AF1) | fTIM1 = 180 MHz
+ * CSE 2206: Lab-02
+ * Task 5 - WS2812B RGB LED: Colour Mixing and Animation
  *
- * WHY DMA:
- *   One-Pulse Mode requires software to reload CCR1 and restart
- *   the timer between every bit (~300 ns loop overhead). WS2812B
- *   has a ±150 ns timing tolerance — the software gap corrupts
- *   reception. DMA writes CCR1 automatically on each PWM period
- *   with zero software latency between bits. This is exactly what
- *   the working HAL code does under the hood.
- *
- * DMA MAPPING (STM32F446 RM0390 Table 28):
- *   DMA2, Stream1, Channel6 → TIM1_CH1 (CC1 request, CC1DE bit)
- *
- * TIMING (ARR=225, PSC=0, fTIM1=180MHz, tick=5.556ns):
- *   Period = 225+1 = 226 ticks = 1.256 µs  ≈ 1.25 µs spec ✓
- *   T1H    = 150 ticks = 0.833 µs           ≈ 0.800 µs spec ✓
- *   T0H    =  75 ticks = 0.417 µs           ≈ 0.400 µs spec ✓
- *   Reset  =  50 × zero CCR1 entries ≥ 50 µs              ✓
- * ============================================================
+ * Author: Md. Samiul Islam Siam (Roll: 02)
+ *         Partho Kumar Modnal (Roll: 07)
  */
 
 #include <stm32f446xx.h>
@@ -28,41 +12,22 @@
 #include <string.h>
 #include "helper.h"
 
-extern void SystemClock_Config(void);
-extern void USART2_Init(void);
-extern void USART2_SendString(const char *s);
-extern void TIM6_Init(void);
-extern void delay_us(uint16_t us);
-extern void delay_ms(uint32_t ms);
+#define WS_ARR      225U    /* TIM1 Auto-Reload (ARR): 226 ticks = 1.256 µs */
+#define WS_T1H      144U    /* Logic-1 high time: 144 ticks = 0.8 µs */
+#define WS_T0H       72U    /* Logic-0 high time:  75 ticks = 0.4 µs */
+#define WS_RESET     50U    /* Reset: 50 × zero entries → ≥ 50 µs line LOW */
+#define NUM_LEDS      5U    /* Physical LED chain length */
 
-/* =========================================================
- * TIMING CONSTANTS — match HAL main.c exactly
- * ========================================================= */
-#define WS_ARR      225U    /* TIM1 Auto-Reload (ARR): 226 ticks = 1.256 µs  */
-#define WS_T1H      150U    /* Logic-1 high time: 150 ticks ≈ 0.833 µs       */
-#define WS_T0H       75U    /* Logic-0 high time:  75 ticks ≈ 0.417 µs       */
-#define WS_RESET     50U    /* Reset: 50 × zero entries → ≥ 50 µs line LOW   */
-#define NUM_LEDS      5U    /* Physical LED chain length                       */
-
-/* =========================================================
- * BUFFERS
- * pwmData: 16-bit CCR1 values — DMA writes these into TIM1->CCR1
- *          one per PWM period. Each entry = one WS2812B bit.
- *   Size: (NUM_LEDS × 24 bits) + WS_RESET trailing zeros
- * ========================================================= */
 #define PWM_BUF_SIZE   ((NUM_LEDS * 24U) + WS_RESET)
 
 static uint16_t pwmData[PWM_BUF_SIZE];
 
-typedef struct { uint8_t r, g, b; } LED_t;
+typedef struct {
+	uint8_t r, g, b;
+} LED_t;
+
 static LED_t g_leds[NUM_LEDS];
 
-/* DMA Transfer-Complete flag — set by DMA2_Stream1_IRQHandler */
-static volatile uint8_t datasentflag = 0;
-
-/* =========================================================
- * SECTION 1 — GPIO Init: PA8 → AF1 (TIM1_CH1)
- * ========================================================= */
 static void GPIO_WS_Init(void)
 {
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
@@ -78,28 +43,12 @@ static void GPIO_WS_Init(void)
     GPIOA->AFR[1] = (GPIOA->AFR[1] & ~0xFU) | 0x1U;
 }
 
-/* =========================================================
- * SECTION 2 — TIM1 Init: Continuous PWM on CH1
- *
- * Configured for continuous (non-one-pulse) PWM.
- * DMA reloads CCR1 every period — no software loop needed.
- *
- * OC1PE (preload) IS enabled here. With DMA this is correct:
- *   DMA writes to CCR1 shadow register each period.
- *   UEV transfers shadow → active CCR1 at the start of each
- *   new period — perfectly synchronised to the PWM waveform.
- *   (This is the opposite of One-Pulse Mode where OC1PE caused
- *    a one-bit shift. In continuous PWM the shadow latching is
- *    the correct and intended behaviour.)
- *
- * DO NOT set CC1DE or CEN here — done per-frame in WS2812B_Send.
- * ========================================================= */
 static void TIM1_WS_Init(void)
 {
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
     __NOP(); __NOP();
 
-    TIM1->CR1  = 0U;           /* Counter disabled (CEN=0)                   */
+    TIM1->CR1  = 0U;           /* Counter disabled (CEN=0)                    */
     TIM1->PSC  = 0U;           /* No prescaler → 180 MHz timer clock          */
     TIM1->ARR  = WS_ARR;       /* Auto-reload = 225 → 226 ticks per period    */
     TIM1->CCR1 = 0U;           /* Compare = 0 → output stays LOW at idle      */
@@ -117,21 +66,8 @@ static void TIM1_WS_Init(void)
     /* Force shadow registers to load, then clear all flags */
     TIM1->EGR = TIM_EGR_UG;
     TIM1->SR  = 0U;
-
-    /* CC1DE and CEN intentionally NOT set here */
 }
 
-/* =========================================================
- * SECTION 3 — DMA2 Stream1 Channel6 Init
- *
- * STM32F446 DMA2 request mapping (RM0390 Table 28):
- *   DMA2, Stream1, Channel6 → TIM1_CH1 (triggered by CC1DE)
- *
- * Transfer: Memory (pwmData[]) → Peripheral (TIM1->CCR1)
- *   16-bit data width (TIM1 is 16-bit, pwmData is uint16_t)
- *   Memory address increments, peripheral address fixed
- *   TC interrupt enabled → DMA2_Stream1_IRQHandler
- * ========================================================= */
 static void DMA2_WS_Init(void)
 {
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
@@ -158,7 +94,7 @@ static void DMA2_WS_Init(void)
      *   PINC  [9]     = 0     Peripheral address fixed (always CCR1)
      *   CIRC  [8]     = 0     Single (non-circular) mode
      *   DIR   [7:6]   = 01    Memory-to-Peripheral
-     *   TCIE  [4]     = 1     Transfer-Complete interrupt enable
+     *   TCIE  [4]     = 0     NOT set — polling used instead of interrupt
      *   EN    [0]     = 0     Stream disabled (enabled per frame)
      */
     DMA2_Stream1->CR =
@@ -167,8 +103,8 @@ static void DMA2_WS_Init(void)
         | (1U << 13U)    /* MSIZE = 1  */
         | (1U << 11U)    /* PSIZE = 1  */
         | (1U << 10U)    /* MINC  = 1  */
-        | (1U <<  6U)    /* DIR   = 01 */
-        | (1U <<  4U);   /* TCIE  = 1  */
+        | (1U <<  6U);   /* DIR   = 01 */
+                         /* TCIE intentionally omitted — polling mode */
 
     /* Peripheral destination: TIM1->CCR1 (fixed, never changes) */
     DMA2_Stream1->PAR = (uint32_t)&TIM1->CCR1;
@@ -176,53 +112,9 @@ static void DMA2_WS_Init(void)
     /* Direct mode (DMDIS=0) — default, no FIFO buffering */
     DMA2_Stream1->FCR &= ~DMA_SxFCR_DMDIS;
 
-    /* NVIC: same priority as HAL MX_DMA_Init */
-    NVIC_SetPriority(DMA2_Stream1_IRQn, 0U);
-    NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+    /* NVIC NOT configured — no interrupt handler registered */
 }
 
-/* =========================================================
- * SECTION 4 — DMA2 Stream1 IRQ Handler
- *
- * Mirrors HAL_TIM_PWM_PulseFinishedCallback() exactly:
- *   1. Acknowledge TC flag
- *   2. Stop TIM1 counter
- *   3. Disable DMA stream
- *   4. Disable CC1DE (no more DMA requests from TIM1)
- *   5. Set datasentflag for WS2812B_Send() to unblock
- * ========================================================= */
-void DMA2_Stream1_IRQHandler(void)
-{
-    if (DMA2->LISR & DMA_LISR_TCIF1)
-    {
-        /* 1. Acknowledge interrupt */
-        DMA2->LIFCR = DMA_LIFCR_CTCIF1;
-
-        /* 2. Stop TIM1 — output goes LOW (CCR1=0 set below) */
-        TIM1->CR1  &= ~TIM_CR1_CEN;
-
-        /* 3. Disable DMA stream */
-        DMA2_Stream1->CR &= ~DMA_SxCR_EN;
-
-        /* 4. Disable TIM1 CH1 DMA request */
-        TIM1->DIER &= ~TIM_DIER_CC1DE;
-
-        /* 5. Signal completion */
-        datasentflag = 1;
-    }
-}
-
-/* =========================================================
- * SECTION 5 — WS2812B_Send()
- *
- * Build pwmData[] from g_leds[], then:
- *   Stop timer → reconfigure DMA → reset timer → enable CC1DE
- *   → enable DMA → start timer → wait for TC ISR
- *
- * The DMA writes one CCR1 value per PWM period automatically.
- * Each rising edge (CNT=0 < CCR1) begins a bit, each falling
- * edge (CNT=CCR1) ends it — no software timing involved.
- * ========================================================= */
 static void WS2812B_Send(void)
 {
     uint32_t idx = 0;
@@ -276,14 +168,17 @@ static void WS2812B_Send(void)
     /* ── Step 8: Start TIM1 — first CC1 event triggers first DMA beat ── */
     TIM1->CR1 |= TIM_CR1_CEN;
 
-    /* ── Step 9: Block until ISR signals completion ── */
-    while (!datasentflag) {}
-    datasentflag = 0;
+    /* ── Step 9: Poll Transfer-Complete flag
+     */
+    while (!(DMA2->LISR & DMA_LISR_TCIF1)) {}
+
+    /* ── Step 10: Inline cleanup (was previously done inside the ISR) ── */
+    DMA2->LIFCR       = DMA_LIFCR_CTCIF1;   /* Clear TC flag                 */
+    TIM1->CR1        &= ~TIM_CR1_CEN;        /* Stop TIM1 counter             */
+    DMA2_Stream1->CR &= ~DMA_SxCR_EN;        /* Disable DMA stream            */
+    TIM1->DIER       &= ~TIM_DIER_CC1DE;     /* Disable TIM1 CH1 DMA request  */
 }
 
-/* =========================================================
- * SECTION 6 — LED Helper API
- * ========================================================= */
 static void WS2812_SetAll(uint8_t r, uint8_t g, uint8_t b)
 {
     for (uint32_t i = 0; i < NUM_LEDS; i++)
@@ -291,9 +186,6 @@ static void WS2812_SetAll(uint8_t r, uint8_t g, uint8_t b)
     WS2812B_Send();
 }
 
-/* =========================================================
- * SECTION 7 — HSV → RGB  (Algorithm A5.4)
- * ========================================================= */
 static void WS2812_SetHue(uint16_t H)
 {
     H = H % 360U;
@@ -316,29 +208,26 @@ static void WS2812_SetHue(uint16_t H)
     WS2812_SetAll(r, g, b);
 }
 
-/* =========================================================
- * SECTION 8 — Colour Palette (Table 4)
- * ========================================================= */
-typedef struct { const char *name; uint8_t r, g, b; } Colour_t;
+typedef struct {
+	const char *name; uint8_t r, g, b;
+} Colour_t;
 
 static const Colour_t palette[] =
 {
-    {"Red",        255,   0,   0},
-    {"Green",        0, 255,   0},
-    {"Blue",         0,   0, 255},
-    {"Yellow",     255, 255,   0},
-    {"Cyan",         0, 255, 255},
-    {"Magenta",    255,   0, 255},
-    {"White",      255, 255, 255},
-    {"Warm White", 255, 200,  80},
-    {"DU Blue",     31,  56, 100},
-    {"Off",          0,   0,   0},
+    {"Red",            255,   0,   0},
+    {"Green",            0, 255,   0},
+    {"Blue",             0,   0, 255},
+    {"Yellow",         255, 255,   0},
+    {"Cyan",             0, 255, 255},
+    {"Magenta",        255,   0, 255},
+    {"White",          255, 255, 255},
+    {"Warm White",     255, 200,  80},
+    {"Cool White",     215, 235, 255},
+    {"DU Blue",         31,  56, 100},
+    {"Off",              0,   0,   0}
 };
 #define PALETTE_COUNT  (sizeof(palette) / sizeof(palette[0]))
 
-/* =========================================================
- * SECTION 9 — main()
- * ========================================================= */
 int main(void)
 {
     char buf[128];
@@ -350,16 +239,16 @@ int main(void)
     TIM1_WS_Init();
     DMA2_WS_Init();
 
-    USART2_SendString("\r\n===== Lab-02 Task 5: WS2812B Bare-Metal + DMA =====\r\n");
+    USART2_SendString("\r\n===== Task 5: WS2812B Colour Mixing and Animation (Bare-Metal) =====\r\n");
 
     /* Power-on clear — all 5 LEDs OFF */
     WS2812_SetAll(0, 0, 0);
     delay_ms(100U);
 
-    /* ══════════════════════════════════════════════════════
-     * Req 1: 10-colour palette, 1 s per colour (all 5 LEDs)
-     * ══════════════════════════════════════════════════════ */
-    USART2_SendString("\r\n[Req 1] Colour palette — 1 s per colour\r\n");
+    /*
+     * Req 1: 10-colour palette, 1 sec per colour (all 5 LEDs)
+     */
+    USART2_SendString("\r\n[1] Colour palette — 1 sec per colour\r\n");
 
     for (uint32_t i = 0; i < PALETTE_COUNT; i++)
     {
@@ -375,10 +264,10 @@ int main(void)
         delay_ms(1000U);
     }
 
-    /* ══════════════════════════════════════════════════════
+    /*
      * Req 2: Hue sweep 0–359°, step 3, 25 ms/step
-     * ══════════════════════════════════════════════════════ */
-    USART2_SendString("\r\n[Req 2] Hue sweep 0-359 (step 3, 25 ms/step)\r\n");
+     */
+    USART2_SendString("\r\n[2] Hue sweep 0-359 (step 3, 25 ms/step)\r\n");
 
     for (uint16_t h = 0; h < 360U; h += 3U)
     {
@@ -388,22 +277,21 @@ int main(void)
     WS2812_SetAll(0, 0, 0);
     USART2_SendString("Hue sweep complete.\r\n");
 
-    /* ══════════════════════════════════════════════════════
+    /*
      * Req 3 (Extension): 4-LED colour-chase, 3 rounds
      *   LED 0-3: one red LED rotates every 200 ms
      *   LED 4  : always OFF
-     * ══════════════════════════════════════════════════════ */
-    USART2_SendString("\r\n[Req 3] Colour chase — 4 LEDs, 3 rounds\r\n");
+     */
+    USART2_SendString("\r\n[3] Colour chase — 5 LEDs, 3 rounds\r\n");
 
     for (int round = 0; round < 3; round++)
     {
-        for (uint32_t active = 0; active < 4U; active++)
+        for (uint32_t active = 0; active < 5U; active++)
         {
             for (uint32_t j = 0; j < NUM_LEDS; j++)
                 g_leds[j] = (LED_t){0, 0, 0};
 
             g_leds[active] = (LED_t){255, 0, 0};
-            /* g_leds[4] stays {0,0,0} */
 
             WS2812B_Send();
 
@@ -421,3 +309,8 @@ int main(void)
 
     while (1) {}
 }
+
+/*
+ * WS2812B RGB LED
+ * Din: Connect to D7
+ */

@@ -164,17 +164,6 @@ static void USART2_SendString(const char *s)
 /* =========================================================
  * TIM2 — 1 ms interrupt, CNT = µs within current ms
  *
- * ── Calculation recap ──────────────────────────────────
- *  fTIM2_CLK = 90 MHz  (APB1=45MHz, prescaler≠1 → ×2)
- *
- *  PSC = 89
- *  tick_freq = 90,000,000 / (89+1) = 1,000,000 Hz = 1 MHz
- *  tick_period = 1 µs
- *
- *  ARR = 999
- *  overflow_period = (999+1) ticks × 1 µs = 1000 µs = 1 ms
- *  → update interrupt fires every 1 ms
- *
  *  After init:
  *    ms_count   increments every 1 ms via ISR
  *    TIM2->CNT  counts 0→999 µs and resets
@@ -244,9 +233,6 @@ void TIM2_IRQHandler(void)
  *     CNT resets to 0,  we read CNT=3
  *     → result = N*1000 + 3  (WRONG, should be (N+1)*1000 + 3)
  *
- *   Fix: read ms_count twice, retry if it changed mid-read.
- *   This guarantees ms_count and CNT belong to the same ms.
- *
  * ── Why return µs not ms? ──────────────────────────────
  *   Returning raw µs lets the PROFILE macro do simple
  *   integer subtraction for elapsed time.
@@ -270,21 +256,8 @@ static uint32_t get_time_us(void)
  * Profile_Print
  *
  * Receives elapsed_us = t1_us - t0_us from PROFILE macro.
- *
- * Splits into display form using professor's formula:
- *   ms_count = elapsed_us / 1000   → whole ms
- *   cnt      = elapsed_us % 1000   → fractional ms (0–999 µs)
- *   display  = "ms_count.cnt ms"   e.g. "1.912 ms"
- *
- * Cycle estimate:
- *   At 180 MHz, 1 µs = 180 CPU cycles
- *   est_cycles = elapsed_us × 180
- *   Accuracy: ±1 µs → ±180 cycles (TIM2 resolution limit)
- *
- * No float used — safe with --specs=nano.specs.
- * %03lu on cnt ensures zero-padding:
- *   7 µs remainder → "007", not "7"  (so 1.007 not 1.7)
  * ========================================================= */
+
 static void Profile_Print(const char *label, uint32_t elapsed_us)
 {
     char buf[128];
@@ -306,14 +279,8 @@ static void Profile_Print(const char *label, uint32_t elapsed_us)
 
 /* =========================================================
  * PROFILE macro
- *
- * Captures microsecond timestamp before and after block.
- * Uses get_time_us() which combines ms_count + CNT safely.
- * Elapsed = t1 - t0 in µs, passed to Profile_Print.
- *
- * No blank lines inside — blank line breaks '\' continuation
- * and causes "initializer element is not constant" errors.
  * ========================================================= */
+
 #define PROFILE(label, block)                  \
     do {                                       \
         uint32_t _t0 = get_time_us();          \
@@ -381,9 +348,6 @@ static void MemCopy_ByteByByte(void)
         dst_buf[i] = src_buf[i];
 }
 
-/* =========================================================
- * Main
- * ========================================================= */
 int main(void)
 {
     SystemClock_Config();

@@ -22,11 +22,6 @@
  *       = pct × 1000    / 100
  *       = pct × 10
  *
- *  Example:
- *   25% → CCR1 = 250
- *   50% → CCR1 = 500
- *   75% → CCR1 = 750
- *
  * ── TIM2 — 1 ms delay (no SysTick) ────────────────────────
  *  fTIM2_CLK = 90 MHz
  *  PSC = 89   → tick = 1 µs
@@ -299,9 +294,6 @@ static void PWM_SetDuty(uint8_t pct)
     TIM3->CCR1 = (uint32_t)pct * (TIM3_ARR + 1U) / 100U;
 }
 
-/* =========================================================
- * Main
- * ========================================================= */
 int main(void)
 {
     char buf[64];
