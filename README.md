@@ -24,6 +24,10 @@ Make sure the following tools are installed before getting started (version 2.1.
 - **Cable:** USB Type-A to Mini-B
 - **Operating System:** Windows 11
 
+### Resources
+- [Reference Manual](https://www.st.com/resource/en/reference_manual/rm0390-stm32f446xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+- [Datasheet](https://www.st.com/resource/en/datasheet/stm32f446mc.pdf)
+
 ## ⚙️ HAL Programming Workflow
 
 HAL (Hardware Abstraction Layer) programming uses STM32CubeMX to auto-generate initialization code, which is then imported into STM32CubeIDE.
