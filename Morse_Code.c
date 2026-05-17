@@ -226,7 +226,7 @@ void delay_ms(uint32_t ms)
    GPIO INIT
    PB0 -> LED
    PB1 -> BUZZER
-   PC13 -> USER BUTTON
+   PC13 -> PUSH BUTTON
    ========================================================= */
 
 void GPIO_Init(void)
@@ -235,27 +235,20 @@ void GPIO_Init(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
 
-    /*
-     * PA6 = LED OUTPUT
-     */
-
+    /* PA6 = LED OUTPUT */
     GPIOA->MODER &= ~(3U << (6 * 2));
-
     GPIOA->MODER |=  (1U << (6 * 2));
 
-    /*
-     * PB1 = OUTPUT
-     */
-
+    /* PB1 = OUTPUT (buzzer) */
     GPIOB->MODER &= ~(3U << (1 * 2));
-
     GPIOB->MODER |=  (1U << (1 * 2));
 
-    /*
-     * PC13 = INPUT
-     */
-
+    /* PC13 = INPUT */
     GPIOC->MODER &= ~(3U << (13 * 2));
+
+    /* *** enable pull-up on PC13 *** */
+    GPIOC->PUPDR &= ~(3U << (13 * 2));   // clear
+    GPIOC->PUPDR |=  (1U << (13 * 2));   // 01 = pull-up
 }
 
 /* =========================================================
@@ -348,14 +341,14 @@ int main(void)
     GPIO_Init();
 
     USART2_SendString(
-        "\r\n=== Morse Decoder Ready ===\r\n");
+        "\r\n==== Morse Code Decoder ====\r\n");
 
     char morseBuffer[10];
 
     uint8_t idx = 0;
 
     /*
-     * USER BUTTON:
+     * PUSH BUTTON:
      * released = 1
      * pressed  = 0
      */
@@ -465,3 +458,14 @@ int main(void)
         prevButton = button;
     }
 }
+
+/*
+
+Circuit connections
+Signal		MCU pin		External connection
+Button		PC13		One leg → PC13, other leg → GND
+LED			PA6			PA6 → 220Ω resistor → LED anode → LED cathode → GND
+Buzzer		PB1			PB1 → Buzzer + → Buzzer − → GND
+UART TX		PA2			PA2 → RX of USB-UART adapter
+
+*/
