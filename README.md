@@ -9,10 +9,11 @@ A step-by-step guide for setting up STM32 projects using both **HAL (Hardware Ab
 
 ## 📋 Table of Contents
 
-- [Prerequisites](#prerequisites)
-- [HAL Programming Workflow](#hal-programming-workflow)
-- [Bare-Metal Programming Workflow](#bare-metal-programming-workflow)
-- [Project Workspace Location](#project-workspace-location)
+- [Prerequisites](#-prerequisites)
+- [HAL Programming Workflow](#-hal-programming-workflow)
+- [Bare-Metal Programming Workflow](#-bare-metal-programming-workflow)
+- [Project Workspace Location](#-project-workspace-location)
+- [Notes](#-notes)
 
 ## 🛠️ Prerequisites
 
@@ -100,6 +101,7 @@ STM32CubeIDE
 4. In Drivers -> CMSIS -> Include and Drivers -> CMSIS -> Device -> ST -> STM32F4xx -> Include: Add/remove include path... -> OK
 
 ```
+> ⚠️ Without the CMSIS driver, you cannot use predefined mnemonics. You must either define them yourself or use direct register values and addresses. 
 
 ## 📁 Project Workspace Location
 
@@ -122,7 +124,11 @@ C:\Users\USER\STM32CubeIDE\workspace_2.1.0\
   <img src="images/nucleo64_arduino_diagram.png" width="90%" alt="NUCLEO-F446RE pin diagram">
 </p>
 
+## 🌟 Show Your Support
+If you found this guide helpful, please consider starring the repository to show your support. 
+Your star would help increase the visibility and also encourage more learners to discover and benefit from it.
+
 ## 📄 License
 
-This project is open-source. Feel free to use and modify it as needed. <br>
+This project is open-source under GPL-3.0 license. Feel free to use and modify it as needed. <br>
 Image source: <a href="https://st.com">STMicroelectronics</a>

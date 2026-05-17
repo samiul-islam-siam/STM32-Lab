@@ -110,14 +110,14 @@ ARR = 0xFFFFFFFF  →  overflows after 4295 s
 
 ### PROFILE Macro
 ```c
-#define PROFILE(num, label, block)          \
-    do {                                    \
-        uint32_t _t0 = DWT_GetCycles();     \
-        uint32_t _u0 = TIM2_GetMicros();    \
-        { block }                           \
-        uint32_t _cyc = DWT_GetCycles()-_t0;\
-        uint32_t _us  = TIM2_GetMicros()-_u0;\
-        Profile_PrintRow(...);              \
+#define PROFILE(num, label, block)            \
+    do {                                      \
+        uint32_t _t0 = DWT_GetCycles();       \
+        uint32_t _u0 = TIM2_GetMicros();      \
+        { block }                             \
+        uint32_t _cyc = DWT_GetCycles()-_t0;  \
+        uint32_t _us  = TIM2_GetMicros()-_u0; \
+        Profile_PrintRow(...);                \
     } while (0)
 ```
 
@@ -166,7 +166,7 @@ sine_lut[i] = (uint8_t)(50.0f * (1.0f + sinf(2π × i / 256)) + 0.5f);
 ### Circuit Connections
 ```
 NUCLEO-64 PA6  ──[330 Ω]──┬── LED anode
-                           └── (cathode to GND)
+                          └── (cathode to GND)
 
 PA6: D12 on Arduino header
 ```
