@@ -100,10 +100,11 @@ STM32CubeIDE
 ### Step 2
 
 ```
-1. Copy 'Drivers' folder from HAL-based project that was created. <br>
-2. Paste it into current project. <br>
-3. Delete the 'STM32F4xx_HAL_Driver' from 'Drivers' folder. <br>
-4. In 'Drivers -> CMSIS -> Include' and 'Drivers -> CMSIS -> Device -> ST -> STM32F4xx -> Include': Add/remove include path... -> OK
+1. Copy 'Drivers' folder from HAL-based project that was created.
+2. Paste it into current project.
+3. Delete the 'STM32F4xx_HAL_Driver' from 'Drivers' folder.
+4. Go to 'Drivers -> CMSIS -> Include' and 'Drivers -> CMSIS -> Device -> ST -> STM32F4xx -> Include':  
+   select Add/remove include path... -> OK
 
 ```
 > ⚠️ Without the CMSIS driver, you cannot use predefined mnemonics. You must either define them yourself or use direct register values and addresses. 
