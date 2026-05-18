@@ -13,17 +13,22 @@ A step-by-step guide for setting up STM32 projects using both **HAL (Hardware Ab
 - [HAL Programming Workflow](#-hal-programming-workflow)
 - [Bare-Metal Programming Workflow](#-bare-metal-programming-workflow)
 - [Project Workspace Location](#-project-workspace-location)
+- [Terminal Setup](#-terminal-setup)
 - [Notes](#-notes)
 
 ## 🛠️ Prerequisites
 
 Make sure the following tools are installed before getting started (version 2.1.0):
 
-- [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html)
-- [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
+- **Software:**
+  - [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html)
+  - [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
+- **Terminal:**
+  - [PuTTY](https://putty.org/index.html) (Windows)/ GTKterm (Linux)
+  > 💡You can also use integrated Command Shell Console in STM32CubeIDE. See [Terminal Setup](#-terminal-setup) to configure the console.
 - **Hardware:** NUCLEO-F446RE development board
 - **Cable:** USB Type-A to Mini-B
-- **Operating System:** Windows 11
+- **Operating System:** Windows/ Linux
 
 ### Resources
 - [Reference Manual](https://www.st.com/resource/en/reference_manual/rm0390-stm32f446xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
@@ -98,7 +103,7 @@ STM32CubeIDE
 1. Copy 'Drivers' folder from HAL-based project that was created. <br>
 2. Paste it into current project. <br>
 3. Delete the 'STM32F4xx_HAL_Driver' from 'Drivers' folder. <br>
-4. In Drivers -> CMSIS -> Include and Drivers -> CMSIS -> Device -> ST -> STM32F4xx -> Include: Add/remove include path... -> OK
+4. In 'Drivers -> CMSIS -> Include' and 'Drivers -> CMSIS -> Device -> ST -> STM32F4xx -> Include': Add/remove include path... -> OK
 
 ```
 > ⚠️ Without the CMSIS driver, you cannot use predefined mnemonics. You must either define them yourself or use direct register values and addresses. 
@@ -112,6 +117,29 @@ C:\Users\USER\STM32CubeIDE\workspace_2.1.0\
 ```
 
 > 💡 You can change this location during the IDE's initial workspace setup or via **File → Switch Workspace**.
+
+## 🗖 Terminal Setup
+We need a serial terminal to communicate with the computer via USART protocol. Follow these steps to configure the integrated serial terminal in **STM32CubeIDE**:
+
+1. Go to 'open console', select **3 Command Shell Console**.
+2. Put this:
+   1. Connection Type: Serial Port
+   2. Connection name → USART2 `<your-serial-port-name>` or New Serial Port Connection 
+   3. Encoding: UTF-8
+3. New serial port connection settings:
+   1. Connection name: give it a name according to your preference
+   2. Serial port: COM4 `<STLink-Virtual-COM-Port>`
+   3. Baud rate: 115200
+   4. Data size: 8
+   5. Parity: None
+   6. Stop bits: 1
+   > ⚠️ Must match with your USART configuration of NUCLEO-F446RE device
+4. How to find port number:
+   1. Go to 'Device Manager'
+   2. Find 'Ports (COM & LPT)' from the list
+   3. Expand it, and you will see the port number <br>
+      `STMicroelectronics STLink Virtual COM Port (COM4)`
+   > ⚠️ Your NUCLEO-F446RE device must be connected with computer via cable 
 
 ## 📌 Notes
 
