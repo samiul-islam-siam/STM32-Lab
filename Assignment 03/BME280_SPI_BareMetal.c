@@ -7,7 +7,7 @@
  * Timer    : TIM6  @ 1-second interrupt
  */
 
-#include "stm32f4xx.h"
+#include "stm32f446xx.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
