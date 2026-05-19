@@ -12,3 +12,23 @@ Solution:
 > 💡 Go to Project > Properties > C/C++ Build > Settings > Tool Settings > MCU/MPU Settings >
       Check Use float with printf from newlib-nano (-u _printf_float) and 
       Check Use float with scanf from newlib-nano (-u _scanf_float) > Apply and Close
+
+## SPI communication:
+| BMP280 | STM32F446RE  |
+| ------ |--------------|
+| VCC    | 3.3V         |
+| GND    | GND          |
+| SCL    | PB10 (D6)    |
+| SDA    | PC1 (A4)     |
+| CSB    | PA4 (A2)     |
+| SDO    | PC2 (CN7-35) |
+
+## I2C communication:
+| GY-BMP280 | STM32F446RE  |
+| --------- |--------------|
+| VCC       | 3.3V         |
+| GND       | GND          |
+| SCL       | PB6 (D10)    |
+| SDA       | PB7 (CN7-21) |
+| CSB       | 3.3V         |
+| SDO       | GND          |
