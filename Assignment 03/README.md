@@ -3,6 +3,12 @@
 STM32F446RE with the BME280 environmental sensor using two different communication protocols: SPI (Part A) and I2C (Part B). 
 Both parts produce identical sensor output; the difference lies entirely in the bus protocol and its register-level configuration.
 
+<p style="text-align: center;">
+  <img src="/images/GY-BMEP280_front_back.jpg" width="25%" alt="NUCLEO-F446RE board back layout">
+  <img src="/images/GY-BMEP280_with_header.jpg" width="25%" alt="NUCLEO-F446RE board front layout">
+  <img src="/images/GY-BMEP280_dimension.jpg" width="25%" alt="NUCLEO-F446RE board back layout">
+</p>
+
 <br>
 
 Warning:
@@ -12,6 +18,11 @@ Solution:
 > 💡 Go to Project > Properties > C/C++ Build > Settings > Tool Settings > MCU/MPU Settings >
       Check Use float with printf from newlib-nano (-u _printf_float) and 
       Check Use float with scanf from newlib-nano (-u _scanf_float) > Apply and Close
+
+## Circuit Diagram:
+<p style="text-align: center;">
+   <img src="/images/GY-BMP280-module-circuit.png" width="50%" alt="NUCLEO-F446RE board front layout">
+</p>
 
 ## SPI communication:
 | BMP280 | STM32F446RE  |
@@ -32,3 +43,4 @@ Solution:
 | SDA       | PB7 (CN7-21) |
 | CSB       | 3.3V         |
 | SDO       | GND          |
+
