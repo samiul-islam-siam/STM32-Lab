@@ -25,13 +25,13 @@ Solution:
 </p>
 
 ## SPI communication:
-| BMP280 | STM32F446RE  |
+| GY-BMP280 | STM32F446RE  |
 | ------ |--------------|
 | VCC    | 3.3V         |
 | GND    | GND          |
-| SCL    | PB10 (D6)    |
+| SCL    | PC7 (D9)     |
 | SDA    | PC1 (A4)     |
-| CSB    | PA4 (A2)     |
+| CSB    | PB9 (D14)    |
 | SDO    | PC2 (CN7-35) |
 
 ## I2C communication:
