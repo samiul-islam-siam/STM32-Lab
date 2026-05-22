@@ -1,4 +1,4 @@
-# 🔬 STM-3 Experimental Branch
+# 🔬 STM-32 Experimental Branch
 
 A collection of STM32 experiments, peripheral tests, and embedded system practice projects.
 
