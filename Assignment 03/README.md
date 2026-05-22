@@ -29,7 +29,7 @@ Solution:
 | ------ |--------------|
 | VCC    | 3.3V         |
 | GND    | GND          |
-| SCL    | PC7 (D9)     |
+| SCL    | PB10 (D6)    |
 | SDA    | PC1 (A4)     |
 | CSB    | PB9 (D14)    |
 | SDO    | PC2 (CN7-35) |
