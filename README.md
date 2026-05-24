@@ -7,8 +7,8 @@ A collection of STM32 experiments, peripheral tests, and embedded system practic
 
 | File | Description |
 |------|-------------|
-| `Dino Game` | Chrome Dino-style game running on a 16x2 LCD |
-| `LCD 1602A` | Bare-Metal and HAL drivers for LCD display |
+| `Dino Game` | Bare-Metal and HAL implementation for Chrome Dino-style game running on a 16x2 LCD |
+| `LCD 1602A` | Bare-Metal and HAL drivers for LCD 1602A display |
 | `LED WS2812B` | WS2812B driver using NOP timing and LED with brightness control |
 | `Morse_Code` | Morse code implementation using push button |
 | `External_LED_Blink.c` | External LED blinking test |
