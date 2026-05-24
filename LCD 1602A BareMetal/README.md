@@ -1,4 +1,4 @@
-# LCD 1602A Driver
+# LCD 1602A Bare-Metal Driver
 LCD 1602A i.e. **16x2 display** Bare Metal driver and example code for STM32F446RE.
 
 ## Circuit Connections
