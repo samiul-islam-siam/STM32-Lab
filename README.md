@@ -7,6 +7,7 @@ A collection of STM32 experiments, peripheral tests, and embedded system practic
 
 | File | Description |
 |------|-------------|
+| `LCD 1602A` | Bare-Metal and HAL drivers for LCD display |
 | `External_LED_Blink.c` | External LED blinking test |
 | `LED_Blinking_by_USART.c` | LED control using USART |
 | `Morse_Code.c` | Morse code using push button |
