@@ -2,6 +2,9 @@
  * lcd.c – Bare-metal LCD 1602A driver, STM32F446RE
  * Drop-in replacement for the HAL version.
  * Only difference: HAL_GPIO_WritePin → GPIO_WritePin, HAL_Delay → delay_ms
+ 
+ Autho: Md. Samiul Islam Siam 
+        & Partho Kumar Mondal
  */
 
 #include "lcd.h"

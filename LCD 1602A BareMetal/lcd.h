@@ -1,6 +1,10 @@
 /*
  * lcd.h – Bare-metal LCD 1602A driver, STM32F446RE
  * Mirrors the HAL version's public API exactly.
+
+Autho: Md. Samiul Islam Siam 
+        & Partho Kumar Mondal
+ 
  */
 
 #ifndef LCD_H_
