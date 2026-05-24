@@ -16,7 +16,7 @@ int main(void)
     SystemClock_Config();
     MX_GPIO_Init();
 
-    /* Pin mapping (same physical wires as HAL version):
+    /* Pin mapping:
        D4 → PC7   D5 → PB6   D6 → PA7   D7 → PA6
        RS → PB5   EN → PB4                          */
     Lcd_PortType ports[] = { GPIOC, GPIOB, GPIOA, GPIOA };
@@ -42,7 +42,7 @@ int main(void)
 }
 
 /* --------------------------------------------------------------------------
- * System clock – HSI 16 MHz, no PLL (same as HAL version)
+ * System clock – HSI 16 MHz, no PLL
  * -------------------------------------------------------------------------- */
 void SystemClock_Config(void)
 {
@@ -60,7 +60,7 @@ void SystemClock_Config(void)
 }
 
 /* --------------------------------------------------------------------------
- * GPIO init – same pins as HAL version
+ * GPIO init
  * -------------------------------------------------------------------------- */
 static void MX_GPIO_Init(void)
 {

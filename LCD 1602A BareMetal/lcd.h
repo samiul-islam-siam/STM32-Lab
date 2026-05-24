@@ -1,10 +1,8 @@
 /*
- * lcd.h – Bare-metal LCD 1602A driver, STM32F446RE
- * Mirrors the HAL version's public API exactly.
-
-Autho: Md. Samiul Islam Siam 
-        & Partho Kumar Mondal
- 
+ * lcd.h – Bare-metal LCD 1602A driver
+ *
+ * Author: Md. Samiul Islam Siam
+ *         Partho Kumar Mondal
  */
 
 #ifndef LCD_H_
@@ -23,7 +21,7 @@ extern const uint8_t ROW_16[];
 extern const uint8_t ROW_20[];
 
 /* --------------------------------------------------------------------------
- * LCD command constants (unchanged from HAL version)
+ * LCD command constants
  * -------------------------------------------------------------------------- */
 #define CLEAR_DISPLAY           0x01
 #define RETURN_HOME             0x02
@@ -49,7 +47,7 @@ extern const uint8_t ROW_20[];
 #define SET_DDRAM_ADDR          0x80
 
 /* --------------------------------------------------------------------------
- * Bare-metal GPIO write – replaces HAL_GPIO_WritePin
+ * Bare-metal GPIO write
  * Uses BSRR: upper 16 bits reset, lower 16 bits set.
  * -------------------------------------------------------------------------- */
 static inline void GPIO_WritePin(GPIO_TypeDef *port, uint16_t pin, uint8_t state)
@@ -61,18 +59,18 @@ static inline void GPIO_WritePin(GPIO_TypeDef *port, uint16_t pin, uint8_t state
 }
 
 /* --------------------------------------------------------------------------
- * Bare-metal delay – replaces HAL_Delay
+ * Bare-metal delay
  * HSI = 16 MHz → ~16000 cycles per ms (conservative, no pipeline tricks)
  * -------------------------------------------------------------------------- */
 void delay_ms(uint32_t ms);
 
 /* --------------------------------------------------------------------------
- * Reuse HAL-style DELAY macro so lcd.c is unchanged
+ * DELAY macro
  * -------------------------------------------------------------------------- */
 #define DELAY(X) delay_ms(X)
 
 /* --------------------------------------------------------------------------
- * Type aliases (identical names to HAL version)
+ * Type aliases
  * -------------------------------------------------------------------------- */
 #define Lcd_PortType  GPIO_TypeDef*
 #define Lcd_PinType   uint16_t
@@ -98,7 +96,7 @@ typedef struct {
 } Lcd_HandleTypeDef;
 
 /* --------------------------------------------------------------------------
- * Public API – identical signatures to HAL version
+ * Public API
  * -------------------------------------------------------------------------- */
 void              Lcd_init(Lcd_HandleTypeDef *lcd);
 void              Lcd_int(Lcd_HandleTypeDef *lcd, int number);
