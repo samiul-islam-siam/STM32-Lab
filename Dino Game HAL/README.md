@@ -1,5 +1,5 @@
 # STM32 Dino Game 🦕
-
+(HAL)
 A Chrome Dino-style game running on a 16x2 LCD, built with STM32F446RE Nucleo board using STM32CubeIDE.
 
 ## How to Play
