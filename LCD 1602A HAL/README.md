@@ -1,4 +1,4 @@
-# LCD 1602A Driver
+# LCD 1602A HAL Driver
 LCD 1602A i.e. **16x2 display** HAL based driver and example code for STM32F446RE.
 
 ## Circuit Connections
