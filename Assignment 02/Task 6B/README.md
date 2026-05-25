@@ -43,6 +43,8 @@ GND  ───────── MG996R  Brown wire   (GND)
   <img src="/images/mg996r_signal.png" width="50%" alt="signal">
 </p>
 
+> PA0 is labelled **A0** on the Arduino Uno header of the NUCLEO-64.
+
 > ⚠️ **Power the servo from an external 5 V supply.** The Nucleo's on-board 5 V pin can also be used but do NOT power from Nucleo 3.3 V pin.  
 > ⚠️ **Always share GND** between the Nucleo and the servo power supply, or the PWM signal will float.
 
