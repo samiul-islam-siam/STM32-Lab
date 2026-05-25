@@ -4,9 +4,9 @@ STM32F446RE with the BME280 environmental sensor using two different communicati
 Both parts produce identical sensor output; the difference lies entirely in the bus protocol and its register-level configuration.
 
 <p style="text-align: center;">
-  <img src="/images/GY-BMEP280_front_back.jpg" width="25%" alt="NUCLEO-F446RE board back layout">
-  <img src="/images/GY-BMEP280_with_header.jpg" width="25%" alt="NUCLEO-F446RE board front layout">
-  <img src="/images/GY-BMEP280_dimension.jpg" width="25%" alt="NUCLEO-F446RE board back layout">
+  <img src="/images/GY-BMEP280_front_back.jpg" width="25%" alt="front and back">
+  <img src="/images/GY-BMEP280_with_header.jpg" width="25%" alt="with header">
+  <img src="/images/GY-BMEP280_dimension.jpg" width="25%" alt="dimensions">
 </p>
 
 <br>

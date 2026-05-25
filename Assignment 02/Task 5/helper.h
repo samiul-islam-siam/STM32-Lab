@@ -1,8 +1,9 @@
 /*
  * CSE 2206: Lab-02
+ * Task 5 - WS2812B RGB LED: Colour Mixing and Animation
  *
  * Author: Md. Samiul Islam Siam (Roll: 02)
- *         Partho Kumar Mondal (Roll: 07)
+ *         Partho Kumar Modnal (Roll: 07)
  */
 
 #ifndef HELPER_H_

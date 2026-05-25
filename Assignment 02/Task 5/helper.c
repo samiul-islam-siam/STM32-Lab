@@ -1,13 +1,14 @@
 /*
- * CSE 2206: Lab-02
- *
  * Author: Md. Samiul Islam Siam (Roll: 02)
- *         Partho Kumar Mondal (Roll: 07)
+ *         Partho Kumar Modnal (Roll: 07)
  */
 
 #include <stm32f446xx.h>
+#include "helper.h"
 #include <stdint.h>
 #include <string.h>
+
+volatile uint32_t tim6_ticks = 0;
 
 void SystemClock_Config(void) {
 	/* 1. Enable PWR clock */
@@ -68,15 +69,6 @@ void SystemClock_Config(void) {
 	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
 }
 
-/*
- * SECTION 1 — USART2
- * PA2=TX, PA3=RX, 115200 8N1, APB1 clock = 45 MHz
- */
-
-/**
- * @brief  Initialise USART2 for 115200 8N1.
- *         PA2 → TX (AF7), PA3 → RX (AF7).
- */
 void USART2_Init(void)
 {
     /* 1. Enable clocks */
@@ -109,10 +101,6 @@ void USART2_Init(void)
     USART2->CR1 = USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
 }
 
-/**
- * @brief  Transmit a null-terminated string over USART2.
- * @param  s  Pointer to string (must be null-terminated).
- */
 void USART2_SendString(const char *s)
 {
     while (*s)
@@ -123,72 +111,52 @@ void USART2_SendString(const char *s)
     while (!(USART2->SR & USART_SR_TC)) {}         /* Wait TX complete */
 }
 
-/* =========================================================
- * SECTION 2 — TIM6 Initialisation for 1 µs tick
- *
- * fTIM6_CLK = 90 MHz
- * PSC = 89  → tick frequency = 90e6 / (89+1) = 1 MHz (1 µs per tick)
- * ARR = 0xFFFF (maximum 16-bit range = 65535 µs per single overflow)
- * ========================================================= */
-
-/**
- * @brief  Initialise TIM6 with 1 µs tick for delay functions.
- *         TIM6 is on APB1 → TIM_CLK = 2 × APB1 = 90 MHz.
- */
 void TIM6_Init(void)
 {
-    /* Step 1: Enable TIM6 peripheral clock via RCC APB1 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM6EN;
 
-    /* Step 2: Short NOP delay for clock stabilisation */
-    __NOP(); __NOP(); __NOP(); __NOP();
+    TIM6->CR1 = 0;
 
-    /* Step 3: Disable counter before configuring */
-    TIM6->CR1 &= ~TIM_CR1_CEN;
+    /*
+     * Timer clock = 90 MHz
+     * Prescaler = 8999
+     *
+     * 90 MHz / 9000 = 10 kHz
+     * 1 tick = 100 us
+     */
 
-    /* Step 4: Prescaler — 1 µs resolution
-     *   tick = fTIM6_CLK / (PSC+1) = 90 MHz / 90 = 1 MHz → 1 µs  */
-    TIM6->PSC = 89U;
 
-    /* Step 5: Auto-reload = max 16-bit value (65535 µs = ~65.5 ms max) */
-    TIM6->ARR = 0xFFFFU;
+    TIM6->PSC = 8999;
+    TIM6->ARR = 9999;
 
-    /* Step 6: Force immediate register update (shadow registers loaded) */
+    /* Load registers immediately */
     TIM6->EGR = TIM_EGR_UG;
 
-    /* Step 7: Clear all status flags */
-    TIM6->SR = 0U;
+    /* Clear pending flags */
+    TIM6->SR = 0;
 
-    /* Step 8: Start the counter */
+    /* Enable update interrupt */
+    TIM6->DIER |= TIM_DIER_UIE;
+
+    /* Enable IRQ in NVIC */
+    NVIC_EnableIRQ(TIM6_DAC_IRQn);
+
+    /* Start timer */
     TIM6->CR1 |= TIM_CR1_CEN;
 }
 
-/* =========================================================
- * SECTION 3 — Delay Functions
- * ========================================================= */
-
-/**
- * @brief  Microsecond blocking delay using TIM6.
- * @param  us  Delay in microseconds (max 65535 due to 16-bit counter).
- */
-void delay_us(uint16_t us)
-{
-    /* Reset counter to zero */
-    TIM6->CNT = 0U;
-
-    /* Busy-wait until CNT reaches requested µs count.
-     * Cast to uint16_t ensures correct comparison within 16-bit range. */
-    while ((uint16_t)TIM6->CNT < us) {}
-}
-
-/**
- * @brief  Millisecond blocking delay.
- * @param  ms  Delay in milliseconds (32-bit, no practical upper limit).
- */
 void delay_ms(uint32_t ms)
 {
-    for (uint32_t i = 0; i < ms; i++)
+    uint32_t start = tim6_ticks;
+
+    while ((tim6_ticks - start) < ms);
+}
+
+void TIM6_DAC_IRQHandler(void)
+{
+    if(TIM6->SR & TIM_SR_UIF)
     {
-        delay_us(1000U);   /* 1 ms = 1000 µs */
+        TIM6->SR &= ~TIM_SR_UIF;
+        tim6_ticks++;
     }
 }

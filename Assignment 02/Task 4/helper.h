@@ -1,0 +1,20 @@
+/*
+ * CSE 2206: Lab-02
+ * Task 4 — PWM Generation and LED Brightness Control
+ *
+ * Author: Md. Samiul Islam Siam (Roll: 02)
+ *         Partho Kumar Modnal (Roll: 07)
+ */
+
+#ifndef HELPER_H_
+#define HELPER_H_
+
+void SystemClock_Config(void);
+
+void USART2_Init(void);
+void USART2_SendString(const char *);
+
+void TIM2_Init(void);
+void delay_ms(uint32_t);
+
+#endif /* HELPER_H_ */
