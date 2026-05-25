@@ -65,7 +65,6 @@ Maximum delay range = 65535 µs
 This allows TIM6 to operate as a free-running microsecond counter.
 
 
-
 ## Delay Functions
 
 ### Microsecond Delay
@@ -80,7 +79,6 @@ void delay_us(uint16_t us);
 - Overflow-safe using unsigned subtraction
 
 
-
 ### Millisecond Delay
 
 ```c
@@ -90,7 +88,6 @@ void delay_ms(uint32_t ms);
 Implemented using repeated `delay_us(1000)` calls.
 
 
-
 ### Second Delay
 
 ```c
@@ -98,7 +95,6 @@ void delay_s(uint32_t sec);
 ```
 
 Implemented using repeated `delay_ms(1000)` calls.
-
 
 
 ### Hour-Minute-Second Delay
@@ -119,66 +115,10 @@ Then executes:
 delay_s(total_seconds);
 ```
 
-
-
-## Demonstration Tasks
-
-### Demo 1 — 500 ms Delay
-
-```c
-delay_ms(500);
-```
-
-Confirms half-second delay generation.
-
-
-
-### Demo 2 — 1000 ms Delay
-
-```c
-delay_ms(1000);
-```
-
-Demonstrates one-second blocking delay.
-
-
-
-### Demo 3 — LED Toggle Animation
-
-The on-board LED toggles:
-
-- ON for **250 ms**
-- OFF for **250 ms**
-- Repeated **10 times**
-
-```text
-10 × (250 ms ON + 250 ms OFF)
-```
-
-
-
-### Demo 4 — 3 Second Delay
-
-```c
-delay_s(3);
-```
-
-
-
-### Demo 5 — HMS Delay
-
-```c
-delay_hms(0, 0, 5);
-```
-
-Implements a **5-second delay** using HMS abstraction.
-
-
-
 ## Serial Output
 
 <p align="center">
-  <img src="/images/task2_output.png" width="65%" alt="UART output">
+  <img src="/images/task2_output.png" width="40%" alt="UART output">
 </p>
 
 
