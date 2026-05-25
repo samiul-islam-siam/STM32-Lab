@@ -34,17 +34,7 @@ Unlike advanced timers, TIM6 has no GPIO output channels and is ideal for intern
 | Usage | Delay generation |
 | Mode | Up-counter |
 
----
 
-## Hardware List
-
-| # | Component | Qty |
-|---|---|---|
-| 1 | NUCLEO-F446RE development board | 1 |
-| 2 | USB Type-B cable | 1 |
-| 3 | On-board LED (LD2) | 1 |
-
----
 
 ## Timer Configuration
 
@@ -74,7 +64,7 @@ Maximum delay range = 65535 µs
 
 This allows TIM6 to operate as a free-running microsecond counter.
 
----
+
 
 ## Delay Functions
 
@@ -89,7 +79,7 @@ void delay_us(uint16_t us);
 - Maximum single delay: **65535 µs**
 - Overflow-safe using unsigned subtraction
 
----
+
 
 ### Millisecond Delay
 
@@ -99,11 +89,7 @@ void delay_ms(uint32_t ms);
 
 Implemented using repeated `delay_us(1000)` calls.
 
-```text
-1 ms = 1000 µs
-```
 
----
 
 ### Second Delay
 
@@ -113,11 +99,7 @@ void delay_s(uint32_t sec);
 
 Implemented using repeated `delay_ms(1000)` calls.
 
-```text
-1 s = 1000 ms
-```
 
----
 
 ### Hour-Minute-Second Delay
 
@@ -137,7 +119,7 @@ Then executes:
 delay_s(total_seconds);
 ```
 
----
+
 
 ## Demonstration Tasks
 
@@ -149,7 +131,7 @@ delay_ms(500);
 
 Confirms half-second delay generation.
 
----
+
 
 ### Demo 2 — 1000 ms Delay
 
@@ -159,7 +141,7 @@ delay_ms(1000);
 
 Demonstrates one-second blocking delay.
 
----
+
 
 ### Demo 3 — LED Toggle Animation
 
@@ -173,7 +155,7 @@ The on-board LED toggles:
 10 × (250 ms ON + 250 ms OFF)
 ```
 
----
+
 
 ### Demo 4 — 3 Second Delay
 
@@ -181,7 +163,7 @@ The on-board LED toggles:
 delay_s(3);
 ```
 
----
+
 
 ### Demo 5 — HMS Delay
 
@@ -191,7 +173,7 @@ delay_hms(0, 0, 5);
 
 Implements a **5-second delay** using HMS abstraction.
 
----
+
 
 ## Serial Output
 
