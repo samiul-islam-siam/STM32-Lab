@@ -25,7 +25,7 @@ A Chrome Dino-style game running on a 16x2 LCD, built with STM32F446RE Nucleo bo
 | LCD Pin | LCD Signal | STM32 Pin                  |
 |---------|------------|----------------------------|
 | 1       | VSS        | GND                        |
-| 2       | VDD        | 3.3V                       |
+| 2       | VDD        | 5V                         |
 | 3       | VO         | Potentiometer middle pin   |
 | 4       | RS         | PB5 (D4)                   |
 | 5       | RW         | GND                        |

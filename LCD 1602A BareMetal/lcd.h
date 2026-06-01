@@ -1,8 +1,6 @@
 /*
- * lcd.h – Bare-metal LCD 1602A driver
+ * lcd.h – Bare-metal LCD driver for STM32F446
  *
- * Author: Md. Samiul Islam Siam
- *         Partho Kumar Mondal
  */
 
 #ifndef LCD_H_
@@ -14,11 +12,11 @@
 #include <stdio.h>
 #include <stdint.h>
 
-/* #define LCD20xN */
+// #define LCD20xN
 #define LCD16xN
 
-extern const uint8_t ROW_16[];
 extern const uint8_t ROW_20[];
+extern const uint8_t ROW_16[];
 
 /* --------------------------------------------------------------------------
  * LCD command constants
@@ -46,10 +44,6 @@ extern const uint8_t ROW_20[];
 #define SETCGRAM_ADDR           0x40
 #define SET_DDRAM_ADDR          0x80
 
-/* --------------------------------------------------------------------------
- * Bare-metal GPIO write
- * Uses BSRR: upper 16 bits reset, lower 16 bits set.
- * -------------------------------------------------------------------------- */
 static inline void GPIO_WritePin(GPIO_TypeDef *port, uint16_t pin, uint8_t state)
 {
     if (state)
@@ -58,15 +52,8 @@ static inline void GPIO_WritePin(GPIO_TypeDef *port, uint16_t pin, uint8_t state
         port->BSRR = (uint32_t)pin << 16;    /* reset */
 }
 
-/* --------------------------------------------------------------------------
- * Bare-metal delay
- * HSI = 16 MHz → ~16000 cycles per ms (conservative, no pipeline tricks)
- * -------------------------------------------------------------------------- */
 void delay_ms(uint32_t ms);
 
-/* --------------------------------------------------------------------------
- * DELAY macro
- * -------------------------------------------------------------------------- */
 #define DELAY(X) delay_ms(X)
 
 /* --------------------------------------------------------------------------
@@ -98,15 +85,17 @@ typedef struct {
 /* --------------------------------------------------------------------------
  * Public API
  * -------------------------------------------------------------------------- */
-void              Lcd_init(Lcd_HandleTypeDef *lcd);
-void              Lcd_int(Lcd_HandleTypeDef *lcd, int number);
-void              Lcd_string(Lcd_HandleTypeDef *lcd, char *string);
-void              Lcd_cursor(Lcd_HandleTypeDef *lcd, uint8_t row, uint8_t col);
 Lcd_HandleTypeDef Lcd_create(Lcd_PortType port[], Lcd_PinType pin[],
-                              Lcd_PortType rs_port, Lcd_PinType rs_pin,
-                              Lcd_PortType en_port, Lcd_PinType en_pin,
-                              Lcd_ModeTypeDef mode);
-void              Lcd_define_char(Lcd_HandleTypeDef *lcd, uint8_t code, uint8_t bitmap[]);
-void              Lcd_clear(Lcd_HandleTypeDef *lcd);
+                             Lcd_PortType rs_port, Lcd_PinType rs_pin,
+                             Lcd_PortType en_port, Lcd_PinType en_pin,
+                             Lcd_ModeTypeDef mode);
+void Lcd_init(Lcd_HandleTypeDef *lcd);
+void Lcd_clear(Lcd_HandleTypeDef *lcd);
+void Lcd_cursor(Lcd_HandleTypeDef *lcd, uint8_t row, uint8_t col);
+
+void Lcd_int(Lcd_HandleTypeDef *lcd, int number);
+void Lcd_string(Lcd_HandleTypeDef *lcd, char *string);
+void Lcd_define_char(Lcd_HandleTypeDef *lcd, uint8_t code, uint8_t bitmap[]);
+void Lcd_write_char(Lcd_HandleTypeDef *lcd, uint8_t code);
 
 #endif /* LCD_H_ */

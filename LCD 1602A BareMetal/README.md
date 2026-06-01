@@ -1,5 +1,5 @@
 # LCD 1602A Bare-Metal Driver
-LCD 1602A i.e. **16x2 display** Bare Metal driver and example code for STM32F446RE.
+LCD 1602A i.e. **16x2 display** Bare Metal driver with example code for STM32F446RE. Scroll down for wiring diagram.
 
 ## Circuit Connections
 
@@ -8,7 +8,7 @@ LCD 1602A i.e. **16x2 display** Bare Metal driver and example code for STM32F446
 | LCD Pin | LCD Signal | STM32 Pin                  |
 |---------|------------|----------------------------|
 | 1       | VSS        | GND                        |
-| 2       | VDD        | 3.3V                       |
+| 2       | VDD        | 5V                         |
 | 3       | VO         | Potentiometer middle pin   |
 | 4       | RS         | PB5 (D4)                   |
 | 5       | RW         | GND                        |
@@ -30,3 +30,10 @@ LCD 1602A i.e. **16x2 display** Bare Metal driver and example code for STM32F446
 | Right   | 3.3V           |
 
 > Connect VO to GND if potentiometer is not available. You can also add resistors instead of potentiometer.
+
+### Wiring Diagram
+
+<p style="text-align: center;">
+  <img src="/images/wiring_direct.jpg" width="48%" alt="wiring without pot">
+  <img src="/images/wiring_pot.jpg" width="48%" alt="wiring with pot">
+</p>

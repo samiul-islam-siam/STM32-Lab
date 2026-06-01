@@ -1,8 +1,6 @@
 /*
- * lcd.c – Bare-metal LCD 1602A driver
+ * lcd.c – Bare-metal LCD for STM32F446RE
  *
- * Author: Md. Samiul Islam Siam
- *         Partho Kumar Mondal
  */
 
 #include "lcd.h"
@@ -10,24 +8,19 @@
 const uint8_t ROW_16[] = { 0x00, 0x40, 0x10, 0x50 };
 const uint8_t ROW_20[] = { 0x00, 0x40, 0x14, 0x54 };
 
-/* --------------------------------------------------------------------------
- * Delay implementation
- * At HSI 16 MHz, one loop iteration ≈ 4 cycles → 4M iterations ≈ 1 s
- * Calibrated constant: 4000 iterations ≈ 1 ms (conservative, safe)
- * -------------------------------------------------------------------------- */
 void delay_ms(uint32_t ms)
 {
     for (uint32_t i = 0; i < ms; i++)
         for (volatile uint32_t j = 0; j < 4000; j++) { }
 }
 
-/************************************** Static declarations **************************************/
+/*********************************** Static declarations ***********************************/
 
 static void lcd_write_data(Lcd_HandleTypeDef *lcd, uint8_t data);
 static void lcd_write_command(Lcd_HandleTypeDef *lcd, uint8_t command);
 static void lcd_write(Lcd_HandleTypeDef *lcd, uint8_t data, uint8_t len);
 
-/************************************** Function definitions **************************************/
+/*********************************** Function definitions ***********************************/
 
 Lcd_HandleTypeDef Lcd_create(
     Lcd_PortType port[], Lcd_PinType pin[],
@@ -67,19 +60,6 @@ void Lcd_init(Lcd_HandleTypeDef *lcd)
     lcd_write_command(lcd, ENTRY_MODE_SET | OPT_INC);
 }
 
-void Lcd_int(Lcd_HandleTypeDef *lcd, int number)
-{
-    char buffer[11];
-    sprintf(buffer, "%d", number);
-    Lcd_string(lcd, buffer);
-}
-
-void Lcd_string(Lcd_HandleTypeDef *lcd, char *string)
-{
-    for (uint8_t i = 0; i < strlen(string); i++)
-        lcd_write_data(lcd, string[i]);
-}
-
 void Lcd_cursor(Lcd_HandleTypeDef *lcd, uint8_t row, uint8_t col)
 {
 #ifdef LCD20xN
@@ -95,6 +75,19 @@ void Lcd_clear(Lcd_HandleTypeDef *lcd)
     lcd_write_command(lcd, CLEAR_DISPLAY);
 }
 
+void Lcd_int(Lcd_HandleTypeDef *lcd, int number)
+{
+    char buffer[11];
+    sprintf(buffer, "%d", number);
+    Lcd_string(lcd, buffer);
+}
+
+void Lcd_string(Lcd_HandleTypeDef *lcd, char *string)
+{
+    for (uint8_t i = 0; i < strlen(string); i++)
+        lcd_write_data(lcd, string[i]);
+}
+
 void Lcd_define_char(Lcd_HandleTypeDef *lcd, uint8_t code, uint8_t bitmap[])
 {
     lcd_write_command(lcd, SETCGRAM_ADDR + (code << 3));
@@ -102,7 +95,12 @@ void Lcd_define_char(Lcd_HandleTypeDef *lcd, uint8_t code, uint8_t bitmap[])
         lcd_write_data(lcd, bitmap[i]);
 }
 
-/************************************** Static function definitions **************************************/
+void Lcd_write_char(Lcd_HandleTypeDef *lcd, uint8_t code)
+{
+    lcd_write_data(lcd, code);
+}
+
+/******************************** Static function definitions ********************************/
 
 static void lcd_write_command(Lcd_HandleTypeDef *lcd, uint8_t command)
 {
@@ -110,7 +108,7 @@ static void lcd_write_command(Lcd_HandleTypeDef *lcd, uint8_t command)
 
     if (lcd->mode == LCD_4_BIT_MODE)
     {
-        lcd_write(lcd, command >> 4,    LCD_NIB);
+        lcd_write(lcd, command >> 4,   LCD_NIB);
         lcd_write(lcd, command & 0x0F, LCD_NIB);
     }
     else
@@ -125,7 +123,7 @@ static void lcd_write_data(Lcd_HandleTypeDef *lcd, uint8_t data)
 
     if (lcd->mode == LCD_4_BIT_MODE)
     {
-        lcd_write(lcd, data >> 4,    LCD_NIB);
+        lcd_write(lcd, data >> 4,   LCD_NIB);
         lcd_write(lcd, data & 0x0F, LCD_NIB);
     }
     else

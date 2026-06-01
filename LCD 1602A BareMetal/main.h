@@ -1,10 +1,10 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include "stm32f446xx.h"   /* CMSIS device header – provides RCC, GPIO structs */
+#include "stm32f446xx.h"
 #include <stdint.h>
 
-/* Re-use familiar pin-name macros */
+/* Familiar pin-name macros */
 #define GPIO_PIN_0   (1U <<  0)
 #define GPIO_PIN_1   (1U <<  1)
 #define GPIO_PIN_2   (1U <<  2)
