@@ -8,7 +8,7 @@ LCD 1602A i.e. **16x2 display** HAL based driver and example code for STM32F446R
 | LCD Pin | LCD Signal | STM32 Pin                  |
 |---------|------------|----------------------------|
 | 1       | VSS        | GND                        |
-| 2       | VDD        | 3.3V                       |
+| 2       | VDD        | 5V                         |
 | 3       | VO         | Potentiometer middle pin   |
 | 4       | RS         | PB5 (D4)                   |
 | 5       | RW         | GND                        |
