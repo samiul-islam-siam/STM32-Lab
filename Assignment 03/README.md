@@ -34,6 +34,7 @@ NVIC Settings: TIM6 global interrupt Enabled
 USART2: Mode: Asynchronous
 I2C1: I2C:I2C (PB6, PB7)
 SPI2: Mode: Full-Duplex Master (PB10, PC1, PC2)
+      CSB : PB9 (GPIO Output)
 ```
 
 ### Clock Configuration
@@ -61,12 +62,12 @@ Solution:
 ## SPI communication:
 | GY-BMP280 | STM32F446RE   |
 |-----------|---------------|
-| VCC       | 3.3V          |
-| GND       | GND           |
-| SCL       | PB10 (D6)     |
-| SDA       | PC1 (A4)      |
-| CSB       | PB9 (D14)     |
-| SDO       | PC2 (CN7-35)  |
+| VCC                 | 3.3V          |
+| GND                 | GND           |
+| SCL [SCK]           | PB10 (D6)     |
+| SDA [SDI/MOSI]      | PC1 (A4)      |
+| CSB [CS]            | PB9 (D14)     |
+| SDO [MISO]          | PC2 (CN7-35)  |
 
 > CN7-35: Alternate morpho of A4 arduino pin
 
